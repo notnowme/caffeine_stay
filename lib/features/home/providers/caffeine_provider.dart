@@ -7,6 +7,7 @@ import 'package:caffeine_stay/features/menu/repositories/menu_repository.dart';
 import 'package:caffeine_stay/features/onboard/models/myinfo_model.dart';
 import 'package:caffeine_stay/features/onboard/view_models/myinfo_vm.dart';
 import 'package:caffeine_stay/features/report/view_models/calc_view_models.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ReportsAsyncNotifier extends AsyncNotifier<List<ReportWithMenuModel>> {
@@ -88,6 +89,45 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
     return total;
   });
 });
+
+final hoursChartStreamProvider = StreamProvider.autoDispose<List<FlSpot>>((
+  ref,
+) async* {
+  ref.watch(reportsAsyncProvider);
+  yield getHoursCaffeine(ref);
+  yield* Stream.periodic(const Duration(seconds: 5), (count) {
+    return getHoursCaffeine(ref);
+  });
+});
+
+List<FlSpot> getHoursCaffeine(Ref ref) {
+  final my = ref.read(myInfoProvider);
+  final halflife = CaffeineCalc.getMyHalfLife(
+    isSmoking: my.smoking,
+    age: my.age,
+  );
+  final now = DateTime.now();
+  final twelvesAgo = now.subtract(const Duration(hours: 12));
+  final allReport = ref.read(reportsAsyncProvider).value ?? [];
+  final recentReport = allReport
+      .where(
+        (r) => r.report.drinkDateAt.isAfter(twelvesAgo),
+      )
+      .toList();
+
+  List<FlSpot> list = [];
+  for (int i = 0; i <= 12; i++) {
+    final target = now.subtract(Duration(hours: 12 - i));
+    final amount = CaffeineCalc.calcRemainigAt(
+      reports: recentReport,
+      halfLife: halflife,
+      date: target,
+    );
+
+    list.add(FlSpot(i.toDouble(), amount));
+  }
+  return list;
+}
 
 class TodayCaffineAsyncNotifier
     extends AsyncNotifier<List<ReportWithMenuModel>> {

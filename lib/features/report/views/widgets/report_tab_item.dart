@@ -56,47 +56,137 @@ class _TabItem extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: context.edgeInsets(all: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '이번 달 총 카페인 섭취',
-                  style: PretendardText.body2.copyWith(
-                    color: AppColor.backgroundColor,
-                  ),
-                ),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '1000',
-                        style: PretendardText.headingNumber.copyWith(
-                          color: AppColor.backgroundColor,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' mg',
-                        style: PretendardText.heading3.copyWith(
-                          color: AppColor.backgroundColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '지난 달 대비 12% 감소',
-                  style: PretendardText.body2.copyWith(
-                    color: AppColor.successColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const _TabItemText(),
         ],
       ),
     );
+  }
+}
+
+class _TabItemText extends ConsumerWidget {
+  const _TabItemText();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tapState = ref.watch(reportTabStateProvider);
+
+    final duration = switch (tapState) {
+      0 => const Duration(days: 7),
+      1 => const Duration(days: 30),
+      _ => const Duration(days: 7),
+    };
+    final date = switch (tapState) {
+      0 => '주',
+      1 => '달',
+      _ => '주',
+    };
+    return ref
+        .watch(reportFamilyAsyncProvider(duration))
+        .when(
+          skipLoadingOnReload: true,
+          skipLoadingOnRefresh: true,
+          data: (data) {
+            final caffeine = ref
+                .read(reportFamilyAsyncProvider(duration).notifier)
+                .addCaffeineAmount();
+            final rate = ref.watch(caffeineDiffProvider(duration)).value ?? 0.0;
+            final isUp = rate.toInt() > 0;
+            return Padding(
+              padding: context.edgeInsets(all: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '최근 한 $date 총 카페인 섭취',
+                    style: PretendardText.body2.copyWith(
+                      color: AppColor.backgroundColor,
+                    ),
+                  ),
+                  TweenAnimationBuilder(
+                    tween: Tween(begin: 0, end: caffeine),
+                    duration: const Duration(milliseconds: 500),
+                    builder: (context, value, child) {
+                      return RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: value.toStringAsFixed(0),
+                              style: PretendardText.headingNumber.copyWith(
+                                color: AppColor.backgroundColor,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' mg',
+                              style: PretendardText.heading3.copyWith(
+                                color: AppColor.backgroundColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Text(
+                    isUp ? '${rate.toStringAsFixed(1)}% 증가' : '$rate 감소',
+                    style: PretendardText.body2.copyWith(
+                      color: isUp ? AppColor.errorColor : AppColor.successColor,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+          error: (error, stackTrace) {
+            return Container();
+          },
+          loading: () {
+            return Padding(
+              padding: context.edgeInsets(all: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '최근 한 $date 총 카페인 섭취',
+                    style: PretendardText.body2.copyWith(
+                      color: AppColor.backgroundColor,
+                    ),
+                  ),
+                  TweenAnimationBuilder(
+                    tween: Tween(begin: 0, end: 0),
+                    duration: const Duration(milliseconds: 500),
+                    builder: (context, value, child) {
+                      return RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: value.toStringAsFixed(0),
+                              style: PretendardText.headingNumber.copyWith(
+                                color: AppColor.backgroundColor,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' mg',
+                              style: PretendardText.heading3.copyWith(
+                                color: AppColor.backgroundColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Text(
+                    '0% 감소',
+                    style: PretendardText.body2.copyWith(
+                      color: AppColor.successColor,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
   }
 }

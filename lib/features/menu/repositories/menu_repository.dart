@@ -57,6 +57,41 @@ class MenuRepository {
     }).toList();
   }
 
+  Future<List<ReportWithMenuModel>?> getDataBetweenDate(
+    Duration start,
+    Duration end,
+  ) async {
+    final query =
+        _db.select(_db.reports).join([
+            innerJoin(
+              _db.caffeineItems,
+              _db.caffeineItems.id.equalsExp(
+                _db.reports.itemId,
+              ),
+            ),
+          ])
+          ..where(
+            _db.reports.drinkDateAt.isBiggerOrEqualValue(
+                  DateTime.now().subtract(
+                    start,
+                  ),
+                ) &
+                _db.reports.drinkDateAt.isSmallerThanValue(
+                  DateTime.now().subtract(end),
+                ),
+          )
+          ..orderBy(
+            [OrderingTerm.desc(_db.reports.drinkDateAt)],
+          );
+    final results = await query.get();
+    return results.map((row) {
+      return ReportWithMenuModel(
+        report: row.readTable(_db.reports),
+        menu: row.readTable(_db.caffeineItems),
+      );
+    }).toList();
+  }
+
   Future<CaffeineItem?> getMenuItem(String name) async {
     return await (_db.select(_db.caffeineItems)
           ..where((t) => t.name.contains(name))

@@ -1,10 +1,10 @@
 part of '../home_screen.dart';
 
-class _CaffeineGraph extends StatelessWidget {
+class _CaffeineGraph extends ConsumerWidget {
   const _CaffeineGraph();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -43,7 +43,7 @@ class _CaffeineGraph extends StatelessWidget {
                 children: generateTimeLabels().map((time) {
                   return Text(
                     DateFormat(
-                      'hha',
+                      'HHa',
                     ).format(time).toLowerCase(),
                     style: PretendardText.caption2.copyWith(
                       color: AppColor.primaryColor,
@@ -54,16 +54,16 @@ class _CaffeineGraph extends StatelessWidget {
             ],
           ),
         ),
-        Positioned.fill(
-          child: ClipRRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                color: Colors.white.withValues(alpha: 0.5),
-              ),
-            ),
-          ),
-        ),
+        // Positioned.fill(
+        //   child: ClipRRect(
+        //     child: BackdropFilter(
+        //       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        //       child: Container(
+        //         color: Colors.white.withValues(alpha: 0.5),
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

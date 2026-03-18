@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:caffeine_stay/common/constants/styles/colors.dart';
 import 'package:caffeine_stay/common/constants/styles/text_style.dart';

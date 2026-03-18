@@ -20,7 +20,7 @@ class _Scaffold extends StatelessWidget {
     return DefaultScaffold(
       // backgroundColor: Colors.red,
       child: DefaultTabController(
-        length: 3,
+        length: 2,
         child: CustomScrollView(
           clipBehavior: Clip.none,
           slivers: [

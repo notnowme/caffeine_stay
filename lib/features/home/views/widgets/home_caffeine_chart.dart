@@ -1,46 +1,19 @@
 part of '../home_screen.dart';
 
-List<FlSpot> getSixHourSpots() {
-  final now = DateTime.now();
-  double hourAgo(int mins) =>
-      now.subtract(Duration(minutes: mins)).millisecondsSinceEpoch.toDouble();
-
-  return [
-    FlSpot(hourAgo(720), 20),
-    FlSpot(hourAgo(500), 120),
-    FlSpot(hourAgo(450), 80),
-    FlSpot(hourAgo(400), 100),
-    FlSpot(hourAgo(380), 200),
-    FlSpot(hourAgo(370), 180),
-    FlSpot(hourAgo(360), 160),
-    FlSpot(hourAgo(300), 120),
-    FlSpot(hourAgo(180), 80),
-    FlSpot(hourAgo(120), 100),
-    FlSpot(hourAgo(60), 200),
-    FlSpot(hourAgo(0), 180), // 현재
-  ]..sort((a, b) => a.x.compareTo(b.x));
-}
-
-class _CaffeineChart extends StatelessWidget {
+class _CaffeineChart extends ConsumerWidget {
   const _CaffeineChart();
 
   @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-
-    final List<FlSpot> spots = getSixHourSpots();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spots = ref.watch(hoursChartStreamProvider);
     return SizedBox(
       height: context.h(200),
       child: LineChart(
+        duration: const Duration(milliseconds: 300),
+        curve: const Cubic(0.64, 0.34, 0.46, 0.82),
         LineChartData(
-          minX: now
-              .subtract(const Duration(hours: 12))
-              .millisecondsSinceEpoch
-              .toDouble(),
-          maxX: now
-              .add(const Duration(minutes: 0))
-              .millisecondsSinceEpoch
-              .toDouble(),
+          minX: 0,
+          maxX: 12,
           minY: 0,
           maxY: 400 * 1.1,
 
@@ -70,7 +43,33 @@ class _CaffeineChart extends StatelessWidget {
           ),
 
           // 터치 시 데이터 표시
-          lineTouchData: const LineTouchData(enabled: false),
+          lineTouchData: LineTouchData(
+            enabled: true,
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (group) => Colors.white,
+              tooltipBorder: BorderSide(
+                width: 2,
+                color: AppColor.primaryColor.withValues(alpha: 0.2),
+              ),
+              tooltipHorizontalAlignment: FLHorizontalAlignment.center,
+              tooltipPadding: context.edgeInsets(
+                horizontal: context.w(8),
+                vertical: context.h(4),
+              ),
+              tooltipMargin: context.h(5),
+              getTooltipItems: (touchedSpots) {
+                return touchedSpots.map((e) {
+                  String amount = e.y.toStringAsFixed(0);
+                  return LineTooltipItem(
+                    '${amount}mg',
+                    PretendardText.caption1.copyWith(
+                      color: AppColor.primaryColor,
+                    ),
+                  );
+                }).toList();
+              },
+            ),
+          ),
 
           // 그래프 둘러싸는 선
           borderData: FlBorderData(show: false),
@@ -79,7 +78,7 @@ class _CaffeineChart extends StatelessWidget {
           gridData: const FlGridData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: spots,
+              spots: spots.value ?? [],
               isCurved: true,
               // 급격한 데이터 변화 시 선이 아래로 튀는 것 방지?
               preventCurveOverShooting: true,
@@ -111,7 +110,7 @@ class _CaffeineChart extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     // 선의 바로 밑 잘 보이게
-                    AppColor.primaryColor.withValues(alpha: 0.3),
+                    AppColor.primaryColor.withValues(alpha: 0.8),
 
                     // 선의 끝 투명
                     AppColor.primaryColor.withValues(alpha: 0.0),

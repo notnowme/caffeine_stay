@@ -19,7 +19,7 @@ class _TabHeaderState extends ConsumerState<_TabHeader>
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_handleTabChange);
     super.initState();
   }
@@ -56,9 +56,6 @@ class _TabHeaderState extends ConsumerState<_TabHeader>
               ),
               Tab(
                 text: '월간',
-              ),
-              Tab(
-                text: '년간',
               ),
             ],
           ),

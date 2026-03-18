@@ -23,9 +23,11 @@ class CaffeineCalc {
   static double calcRemainig({
     required ReportWithMenuModel reports,
     required double halfLife,
+    DateTime? date,
   }) {
-    final now = DateTime.now();
-    final hours = now.difference(reports.report.drinkDateAt).inMinutes / 60.0;
+    final targetTime = date ?? DateTime.now();
+    final hours =
+        targetTime.difference(reports.report.drinkDateAt).inMinutes / 60.0;
 
     double result;
 
@@ -39,5 +41,22 @@ class CaffeineCalc {
     }
 
     return result < 1.0 ? 0.0 : result;
+  }
+
+  static double calcRemainigAt({
+    required List<ReportWithMenuModel> reports,
+    required double halfLife,
+    DateTime? date,
+  }) {
+    final targetTime = date ?? DateTime.now();
+    return reports.fold(0.0, (sum, r) {
+      // if (r.report.drinkDateAt.isAfter(targetTime)) return sum;
+      return sum +
+          CaffeineCalc.calcRemainig(
+            reports: r,
+            halfLife: halfLife,
+            date: targetTime,
+          );
+    });
   }
 }

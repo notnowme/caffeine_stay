@@ -4,6 +4,8 @@ import 'package:caffeine_stay/common/widgets/default_scaffold.dart';
 import 'package:caffeine_stay/common/widgets/default_sliver_appbar.dart';
 import 'package:caffeine_stay/features/report/mixins/report_graph_mixin.dart';
 import 'package:caffeine_stay/features/report/mixins/report_mixin.dart';
+import 'package:caffeine_stay/features/report/view_models/report_view_models.dart';
+import 'package:caffeine_stay/features/report/view_models/tab_state_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
