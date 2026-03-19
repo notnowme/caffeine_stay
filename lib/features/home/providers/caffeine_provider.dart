@@ -46,18 +46,8 @@ final reportsAsyncProvider = AsyncNotifierProvider.autoDispose(
   () => ReportsAsyncNotifier(),
 );
 
-// Stream에 초기값을 넣기 위한 계산
-double _calculateTotal(List<ReportWithMenuModel> reports, MyInfoModel my) {
-  final halflife = CaffeineCalc.getMyHalfLife(
-    isSmoking: my.smoking,
-    age: my.age,
-  );
-  return reports.fold(
-    0,
-    (prev, r) =>
-        prev + CaffeineCalc.calcRemainig(reports: r, halfLife: halflife),
-  );
-}
+/// 몇 초마다 갱신할 건지
+const homeGraphDuration = Duration(seconds: 2);
 
 // 카페인 농도 스트림
 final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
@@ -73,7 +63,7 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
   yield initCalc();
 
   // Stream이 종료될 때까지 실행한다.
-  yield* Stream.periodic(const Duration(minutes: 1), (count) {
+  yield* Stream.periodic(homeGraphDuration, (count) {
     final halflife = CaffeineCalc.getMyHalfLife(
       isSmoking: my.smoking,
       age: my.age,
@@ -90,16 +80,31 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
   });
 });
 
+/// Stream에 초기값을 넣기 위한 계산
+double _calculateTotal(List<ReportWithMenuModel> reports, MyInfoModel my) {
+  final halflife = CaffeineCalc.getMyHalfLife(
+    isSmoking: my.smoking,
+    age: my.age,
+  );
+  return reports.fold(
+    0,
+    (prev, r) =>
+        prev + CaffeineCalc.calcRemainig(reports: r, halfLife: halflife),
+  );
+}
+
+/// 선 그래프 스트림 프로바이더
 final hoursChartStreamProvider = StreamProvider.autoDispose<List<FlSpot>>((
   ref,
 ) async* {
   ref.watch(reportsAsyncProvider);
   yield getHoursCaffeine(ref);
-  yield* Stream.periodic(const Duration(seconds: 5), (count) {
+  yield* Stream.periodic(homeGraphDuration, (count) {
     return getHoursCaffeine(ref);
   });
 });
 
+/// 특정 시간의 농도를 계산하기
 List<FlSpot> getHoursCaffeine(Ref ref) {
   final my = ref.read(myInfoProvider);
   final halflife = CaffeineCalc.getMyHalfLife(
@@ -107,19 +112,13 @@ List<FlSpot> getHoursCaffeine(Ref ref) {
     age: my.age,
   );
   final now = DateTime.now();
-  final twelvesAgo = now.subtract(const Duration(hours: 12));
   final allReport = ref.read(reportsAsyncProvider).value ?? [];
-  final recentReport = allReport
-      .where(
-        (r) => r.report.drinkDateAt.isAfter(twelvesAgo),
-      )
-      .toList();
 
   List<FlSpot> list = [];
   for (int i = 0; i <= 12; i++) {
     final target = now.subtract(Duration(hours: 12 - i));
     final amount = CaffeineCalc.calcRemainigAt(
-      reports: recentReport,
+      reports: allReport,
       halfLife: halflife,
       date: target,
     );
@@ -127,6 +126,25 @@ List<FlSpot> getHoursCaffeine(Ref ref) {
     list.add(FlSpot(i.toDouble(), amount));
   }
   return list;
+}
+
+/// 선 그래프 x축 시간 갱신 프로바이더
+final hoursChartTimeStreamProvider = StreamProvider.autoDispose<List<DateTime>>(
+  (ref) async* {
+    yield generateTimeLabels();
+    yield* Stream.periodic(homeGraphDuration, (count) {
+      return generateTimeLabels();
+    });
+  },
+);
+
+/// 현재 시간 기준으로 12시간 전 가져오기
+List<DateTime> generateTimeLabels() {
+  final now = DateTime.now();
+  return List.generate(7, (index) {
+    // 0, 2, 4, 6, 8, 10, 12시간 전 계산
+    return now.subtract(Duration(hours: (6 - index) * 2));
+  });
 }
 
 class TodayCaffineAsyncNotifier
@@ -166,6 +184,7 @@ final todayCaffeineProvider = AsyncNotifierProvider.autoDispose(
   () => TodayCaffineAsyncNotifier(),
 );
 
+/// 오늘 마신 총 카페인 프로바이더
 final todayCaffeineAmountProvider = FutureProvider.autoDispose((ref) {
   final reports = ref.watch(todayCaffeineProvider).value ?? [];
   double total = 0.0;

@@ -38,18 +38,24 @@ class _CaffeineGraph extends ConsumerWidget {
               context.verticalSpace(24),
               const _CaffeineChart(),
               context.verticalSpace(12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: generateTimeLabels().map((time) {
-                  return Text(
-                    DateFormat(
-                      'HHa',
-                    ).format(time).toLowerCase(),
-                    style: PretendardText.caption2.copyWith(
-                      color: AppColor.primaryColor,
-                    ),
+              Consumer(
+                builder: (consumerContext, ref, child) {
+                  final timelabels =
+                      ref.watch(hoursChartTimeStreamProvider).value ?? [];
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: timelabels.map((time) {
+                      return Text(
+                        DateFormat(
+                          'HHa',
+                        ).format(time).toLowerCase(),
+                        style: PretendardText.caption2.copyWith(
+                          color: AppColor.primaryColor,
+                        ),
+                      );
+                    }).toList(),
                   );
-                }).toList(),
+                },
               ),
             ],
           ),
@@ -67,12 +73,4 @@ class _CaffeineGraph extends ConsumerWidget {
       ],
     );
   }
-}
-
-List<DateTime> generateTimeLabels() {
-  final now = DateTime.now();
-  return List.generate(7, (index) {
-    // 0, 2, 4, 6, 8, 10, 12시간 전 계산
-    return now.subtract(Duration(hours: (6 - index) * 2));
-  });
 }

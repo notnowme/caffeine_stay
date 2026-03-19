@@ -7,6 +7,7 @@ class MenuRepository {
   final AppDataBase _db;
   MenuRepository(this._db);
 
+  /// 마신 카페인을 추가합니다.
   Future<void> addReport(CaffeineItem item) async {
     await _db.transaction(() async {
       final updated =
@@ -26,6 +27,8 @@ class MenuRepository {
     });
   }
 
+  /// Duration을 받아 Duration부터 현재까지의 데이터를 가져옵니다.
+  /// ex) 12시간 전부터 지금까지
   Future<List<ReportWithMenuModel>?> fetchReportByDate(
     Duration duration,
   ) async {
@@ -57,6 +60,8 @@ class MenuRepository {
     }).toList();
   }
 
+  /// 특정 시간대의 데이터를 가져옵니다.
+  /// 12시간 전 ~ 6시간 전 사이.
   Future<List<ReportWithMenuModel>?> getDataBetweenDate(
     Duration start,
     Duration end,
@@ -92,6 +97,7 @@ class MenuRepository {
     }).toList();
   }
 
+  /// 이름으로 단일 데이터를 가져옵니다.
   Future<CaffeineItem?> getMenuItem(String name) async {
     return await (_db.select(_db.caffeineItems)
           ..where((t) => t.name.contains(name))
@@ -99,13 +105,18 @@ class MenuRepository {
         .getSingleOrNull();
   }
 
-  Future<List<CaffeineItem>?> searchtMenuItems(String name) async {
+  /// 이름으로 검색하여, 원하는 수만큼 가져옵니다.
+  Future<List<CaffeineItem>?> searchtMenuItems(
+    String name, {
+    int limit = 5,
+  }) async {
     return await (_db.select(_db.caffeineItems)
           ..where((t) => t.name.contains(name))
-          ..limit(5))
+          ..limit(limit))
         .get();
   }
 
+  /// 자주 추가한 상위 7개 데이터를 가져옵니다.
   Future<List<CaffeineItem>?> getFavorites() async {
     return await (_db.select(
             _db.caffeineItems,
@@ -120,6 +131,7 @@ class MenuRepository {
   }
 }
 
+/// 메뉴 테이블에 접근하는 프로바이더
 final menuRepositoryProvider = Provider((ref) {
   final db = ref.watch(databaseProvider);
   return MenuRepository(db);

@@ -5,6 +5,7 @@ import 'package:caffeine_stay/common/providers/error_provider.dart';
 import 'package:caffeine_stay/features/menu/models/report_with_menu_model.dart';
 import 'package:caffeine_stay/features/menu/repositories/menu_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class ReportFamilyAsyncNotifier
     extends AsyncNotifier<List<ReportWithMenuModel>> {
@@ -98,4 +99,30 @@ final caffeineDiffProvider = FutureProvider.autoDispose
       double total = calcCaffeineAmount(prev);
 
       return calcIncreRate(current, total);
+    });
+
+final reportGraphDataProvider = FutureProvider.autoDispose
+    .family<List<double>, int>((ref, days) async {
+      final duration = Duration(days: days);
+      final reports =
+          ref.watch(reportFamilyAsyncProvider(duration)).value ?? [];
+
+      final isWeek = days == 7;
+      final now = DateTime.now();
+      final int generate = isWeek ? 7 : 30;
+
+      Map<String, double> dailyMap = {};
+      for (int i = 0; i < generate; i++) {
+        final date = now.subtract(Duration(days: i));
+        final dateKey = DateFormat('yyyy-MM-dd').format(date);
+        dailyMap[dateKey] = 0.0;
+      }
+
+      for (final r in reports) {
+        final dateKey = DateFormat('yyyy-MM-dd').format(r.report.drinkDateAt);
+        if (dailyMap.containsKey(dateKey)) {
+          dailyMap[dateKey] = dailyMap[dateKey]! + r.menu.caffeineAmount;
+        }
+      }
+      return dailyMap.values.toList().reversed.toList();
     });

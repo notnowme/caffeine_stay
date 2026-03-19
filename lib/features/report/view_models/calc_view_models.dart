@@ -39,7 +39,6 @@ class CaffeineCalc {
       final decayHours = hours - 0.5;
       result = reports.menu.caffeineAmount * pow(0.5, decayHours / halfLife);
     }
-
     return result < 1.0 ? 0.0 : result;
   }
 
@@ -50,7 +49,7 @@ class CaffeineCalc {
   }) {
     final targetTime = date ?? DateTime.now();
     return reports.fold(0.0, (sum, r) {
-      // if (r.report.drinkDateAt.isAfter(targetTime)) return sum;
+      if (r.report.drinkDateAt.isAfter(targetTime)) return sum;
       return sum +
           CaffeineCalc.calcRemainig(
             reports: r,

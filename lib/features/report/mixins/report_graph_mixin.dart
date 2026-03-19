@@ -1,6 +1,9 @@
 import 'package:caffeine_stay/common/constants/styles/colors.dart';
+import 'package:caffeine_stay/common/constants/styles/text_style.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+
+const weekDayList = ['', '월', '화', '수', '목', '금', '토', '일'];
 
 mixin class ReportWriteGraph {
   BarChartGroupData makeGroupData(
@@ -39,6 +42,51 @@ mixin class ReportWriteGraph {
         ),
       ],
       showingTooltipIndicators: showTooltips,
+    );
+  }
+
+  String weekText(int day) {
+    final now = DateTime.now();
+    final targetDate = now.subtract(Duration(days: 6 - day));
+
+    return weekDayList[targetDate.weekday];
+  }
+
+  String monthText(int index) {
+    final now = DateTime.now();
+    final targetDate = now.subtract(Duration(days: 29 - index));
+    return '${targetDate.day}일';
+  }
+
+  Widget getWeeklyTitles(double value, TitleMeta meta) {
+    return SideTitleWidget(
+      meta: meta,
+      // space: context.h(8),
+      child: Text(
+        weekText(value.toInt()),
+        style: PretendardText.caption1.copyWith(
+          color: value.toInt() == 6
+              ? AppColor.primaryColor
+              : AppColor.descColor,
+          fontWeight: value.toInt() == 6 ? FontWeight.w800 : FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget getMontlyTitles(double value, TitleMeta meta) {
+    return SideTitleWidget(
+      meta: meta,
+      // space: context.h(8),
+      child: Text(
+        monthText(value.toInt()),
+        style: PretendardText.caption1.copyWith(
+          color: value.toInt() == 29
+              ? AppColor.primaryColor
+              : AppColor.descColor,
+          fontWeight: value.toInt() == 29 ? FontWeight.w800 : FontWeight.w500,
+        ),
+      ),
     );
   }
 }
