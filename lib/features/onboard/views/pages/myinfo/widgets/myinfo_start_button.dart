@@ -11,6 +11,8 @@ class _Button extends ConsumerWidget with MyInfoEvent {
         action: () async {
           try {
             await read(ref);
+            final storage = ref.read(secureStorageProvider);
+            await storage.write(key: 'isFirstTime', value: 'false');
             if (context.mounted) {
               context.goNamed(HomeScreen.routeName);
             }

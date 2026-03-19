@@ -52,6 +52,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with ApiMixin {
           currentState = '데이터 저장 완료!';
         });
         await Future.delayed(const Duration(milliseconds: 200));
+        setState(() {
+          currentState = '개인 정보를 불러오는 중...';
+        });
+        await Future.delayed(const Duration(milliseconds: 200));
         final isFirstTime = await storage.read(key: 'isFirstTime');
         if (mounted) {
           if (isFirstTime == null || isFirstTime == 'true') {

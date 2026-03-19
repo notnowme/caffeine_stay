@@ -31,7 +31,10 @@ class SettingsInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const _Scaffold(
-      appBar: DefaultSliverAppbar(title: '개인 정보'),
+      appBar: DefaultSliverAppbar(
+        title: '개인 정보',
+        showBackButton: true,
+      ),
       list: _List(),
       tips: _Tips(),
     );

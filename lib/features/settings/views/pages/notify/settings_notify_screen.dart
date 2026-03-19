@@ -18,7 +18,10 @@ class SettingsNotifyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const _Scaffold(
-      appBar: DefaultSliverAppbar(title: '알림 설정'),
+      appBar: DefaultSliverAppbar(
+        title: '알림 설정',
+        showBackButton: true,
+      ),
       list: _List(),
     );
   }

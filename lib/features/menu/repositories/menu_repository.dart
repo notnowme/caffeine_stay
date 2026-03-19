@@ -60,6 +60,33 @@ class MenuRepository {
     }).toList();
   }
 
+  Future<List<ReportWithMenuModel>?> fetchReportByDateTime(
+    DateTime date,
+  ) async {
+    final query =
+        _db.select(_db.reports).join([
+            innerJoin(
+              _db.caffeineItems,
+              _db.caffeineItems.id.equalsExp(
+                _db.reports.itemId,
+              ),
+            ),
+          ])
+          ..where(
+            _db.reports.drinkDateAt.isBiggerOrEqualValue(date),
+          )
+          ..orderBy(
+            [OrderingTerm.desc(_db.reports.drinkDateAt)],
+          );
+    final results = await query.get();
+    return results.map((row) {
+      return ReportWithMenuModel(
+        report: row.readTable(_db.reports),
+        menu: row.readTable(_db.caffeineItems),
+      );
+    }).toList();
+  }
+
   /// 특정 시간대의 데이터를 가져옵니다.
   /// 12시간 전 ~ 6시간 전 사이.
   Future<List<ReportWithMenuModel>?> getDataBetweenDate(

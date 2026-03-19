@@ -39,7 +39,9 @@ class _FavoriteList extends ConsumerWidget {
             },
             loading: () {
               return SliverToBoxAdapter(
-                child: Container(),
+                child: SizedBox(
+                  height: context.h(600),
+                ),
               );
             },
           ),

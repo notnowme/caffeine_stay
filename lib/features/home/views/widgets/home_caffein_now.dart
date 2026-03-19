@@ -108,11 +108,12 @@ class _CaffeineRealTimeText extends ConsumerWidget {
   }
 }
 
-class _SleepPeriodic extends StatelessWidget {
+class _SleepPeriodic extends ConsumerWidget {
   const _SleepPeriodic();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sleeptime = ref.watch(sleepTimeProvider);
     return Container(
       decoration: BoxDecoration(
         color: AppColor.backgroundColor.withValues(alpha: .2),
@@ -143,7 +144,7 @@ class _SleepPeriodic extends StatelessWidget {
               ),
             ),
             Text(
-              '오후 11:30',
+              DateFormat('a hh:mm', 'ko').format(sleeptime),
               style: PretendardText.body1.copyWith(
                 color: AppColor.backgroundColor,
               ),

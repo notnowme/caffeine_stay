@@ -11,9 +11,9 @@ class _ListState extends ConsumerState<_List> with MyInfoState, MyInfoEvent {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await getMyInfo(ref);
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   await getMyInfo(ref);
+    // });
   }
 
   @override

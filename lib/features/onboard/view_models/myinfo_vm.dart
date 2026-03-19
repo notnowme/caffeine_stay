@@ -7,31 +7,27 @@ import 'package:caffeine_stay/features/onboard/models/myinfo_model.dart';
 import 'package:caffeine_stay/features/settings/views/pages/info/settings_info_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyInfoViewModel extends Notifier<MyInfoModel> {
+class MyInfoViewModel extends AsyncNotifier<MyInfoModel> {
   late final InfoRepository _repo;
   @override
-  build() {
+  build() async {
     _repo = ref.read(infoRepositoryProvider);
-    return const MyInfoModel(
-      gender: Gender.male,
-      weight: 70,
-      age: 25,
-      smoking: false,
-    );
+    return await _getMyInfo() ??
+        const MyInfoModel(
+          gender: Gender.male,
+          weight: 70,
+          age: 25,
+          smoking: false,
+        );
   }
 
-  FutureOr<void> getMyInfo() async {
+  FutureOr<MyInfoModel?> _getMyInfo() async {
     try {
       final my = await _repo.getMyInfo();
       if (my != null) {
-        state = my;
+        return my;
       } else {
-        final error = CustomUserError(
-          title: '오류',
-          message: '회원 정보를 가져오지 못했습니다.',
-          path: SettingsInfoScreen.routeName,
-        );
-        ref.read(errorProvider.notifier).updateError(error);
+        throw Exception('회원 정보를 가져오지 못했습니다.');
       }
     } catch (e) {
       final error = CustomOthersError(
@@ -41,43 +37,47 @@ class MyInfoViewModel extends Notifier<MyInfoModel> {
       );
       ref.read(errorProvider.notifier).updateError(error);
     }
+    return null;
   }
 
   void updateGender(Gender g) {
-    state = state.copyWith(gender: g);
+    state = AsyncValue.data(
+      state.value!.copyWith(gender: g),
+    );
   }
 
   void updateWeight(double w) {
-    state = state.copyWith(weight: w);
+    state = AsyncValue.data(
+      state.value!.copyWith(weight: w),
+    );
   }
 
   void updateAge(int a) {
-    state = state.copyWith(age: a);
+    state = AsyncValue.data(
+      state.value!.copyWith(age: a),
+    );
   }
 
   void updateSmoking(bool s) {
-    state = state.copyWith(smoking: s);
+    state = AsyncValue.data(
+      state.value!.copyWith(smoking: s),
+    );
   }
 
   void clear() {
-    state = const MyInfoModel(
-      gender: Gender.male,
-      weight: 70,
-      age: 25,
-      smoking: false,
+    state = const AsyncValue.data(
+      MyInfoModel(
+        gender: Gender.male,
+        weight: 70,
+        age: 25,
+        smoking: false,
+      ),
     );
   }
 }
 
 final myInfoProvider =
-    NotifierProvider.autoDispose<MyInfoViewModel, MyInfoModel>(
-      () {
-        return MyInfoViewModel();
-      },
-    );
-
-final myInfoSettingsProvider =
-    NotifierProvider.autoDispose<MyInfoViewModel, MyInfoModel>(
+    AsyncNotifierProvider.autoDispose<MyInfoViewModel, MyInfoModel>(
       () {
         return MyInfoViewModel();
       },

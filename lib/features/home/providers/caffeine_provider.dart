@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:caffeine_stay/common/models/error_model.dart';
 import 'package:caffeine_stay/common/providers/error_provider.dart';
@@ -54,7 +55,7 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
   ref,
 ) async* {
   final reports = ref.watch(reportsAsyncProvider).value ?? [];
-  final my = ref.watch(myInfoProvider);
+  final my = ref.watch(myInfoProvider).value!;
 
   double initCalc() => _calculateTotal(reports, my);
 
@@ -106,7 +107,7 @@ final hoursChartStreamProvider = StreamProvider.autoDispose<List<FlSpot>>((
 
 /// 특정 시간의 농도를 계산하기
 List<FlSpot> getHoursCaffeine(Ref ref) {
-  final my = ref.read(myInfoProvider);
+  final my = ref.read(myInfoProvider).value!;
   final halflife = CaffeineCalc.getMyHalfLife(
     isSmoking: my.smoking,
     age: my.age,
@@ -158,8 +159,9 @@ class TodayCaffineAsyncNotifier
 
   Future<List<ReportWithMenuModel>> _fetchTodayReports() async {
     try {
-      final result =
-          await _repo.fetchReportByDate(const Duration(hours: 24)) ?? [];
+      final now = DateTime.now();
+      final dayStart = DateTime(now.year, now.month, now.day);
+      final result = await _repo.fetchReportByDateTime(dayStart) ?? [];
       return result;
     } catch (e) {
       rethrow;
@@ -196,4 +198,24 @@ final todayCaffeineAmountProvider = FutureProvider.autoDispose((ref) {
     }
     return total;
   }
+});
+
+DateTime calcSleepTime({
+  required double currentCaffeine,
+  double threshold = 50.0,
+  double halflife = 5.0,
+}) {
+  if (currentCaffeine <= threshold) return DateTime.now();
+
+  double result =
+      halflife * (math.log(threshold / currentCaffeine) / math.log(0.5));
+  return DateTime.now().add(Duration(minutes: (result * 60).toInt()));
+}
+
+// 카페인 변화를 바라보고 있으므로
+// 이 프로바이더는 굳이 Stream일 필요가 없다
+final sleepTimeProvider = Provider.autoDispose((ref) {
+  final currentCaffeine = ref.watch(currentCaffeineStreamProvider).value ?? 0.0;
+  // final my = ref.watch(myInfoProvider);
+  return calcSleepTime(currentCaffeine: currentCaffeine);
 });
