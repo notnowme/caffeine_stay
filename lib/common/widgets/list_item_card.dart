@@ -1,5 +1,6 @@
 import 'package:caffeine_stay/common/constants/styles/colors.dart';
 import 'package:caffeine_stay/common/constants/styles/text_style.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';
@@ -48,7 +49,7 @@ class ItemCard extends StatelessWidget {
                     ),
                   ),
                   child: Icon(
-                    Icons.coffee,
+                    CupertinoIcons.drop_fill,
                     size: context.h(24),
                     color: AppColor.primaryColor,
                   ),

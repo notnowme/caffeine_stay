@@ -7,6 +7,7 @@ import 'package:caffeine_stay/common/widgets/default_sliver_appbar.dart';
 import 'package:caffeine_stay/features/onboard/mixins/myinfo_mixin.dart';
 import 'package:caffeine_stay/features/onboard/models/myinfo_model.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';

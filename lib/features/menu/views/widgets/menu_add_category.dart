@@ -25,22 +25,22 @@ class _MenuAddCategory extends StatelessWidget {
           children: const [
             _MenuAddCatCard(
               label: '커피',
-              icon: Icons.coffee_rounded,
+              icon: CupertinoIcons.drop_fill,
               isSelected: true,
             ),
             _MenuAddCatCard(
               label: '음료',
-              icon: Icons.electric_bolt_rounded,
+              icon: CupertinoIcons.bolt_fill,
               isSelected: false,
             ),
             _MenuAddCatCard(
               label: '차',
-              icon: Icons.coffee,
+              icon: CupertinoIcons.drop,
               isSelected: false,
             ),
             _MenuAddCatCard(
               label: '기타',
-              icon: Icons.more_horiz_rounded,
+              icon: CupertinoIcons.ellipsis,
               isSelected: false,
             ),
           ],

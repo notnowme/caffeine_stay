@@ -14,6 +14,33 @@ class _TodayDrink extends ConsumerWidget {
           .watch(todayCaffeineProvider)
           .when(
             data: (data) {
+              if (data.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: context.edgeInsets(
+                      top: context.h(16),
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            CupertinoIcons.drop_fill,
+                            color: AppColor.primaryColor,
+                            size: context.h(36),
+                          ),
+                          context.verticalSpace(4),
+                          Text(
+                            '아직 카페인 섭취를 기록하지 않았어요.',
+                            style: PretendardText.body1.copyWith(
+                              color: AppColor.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
               return SliverList.separated(
                 itemCount: data.length,
                 separatorBuilder: (context, index) {

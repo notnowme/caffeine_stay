@@ -55,7 +55,7 @@ class _Icon extends StatelessWidget {
         Icon(
           color: AppColor.secondaryColor,
           size: context.h(85),
-          Icons.coffee_outlined,
+          CupertinoIcons.drop_fill,
         ),
       ],
     );

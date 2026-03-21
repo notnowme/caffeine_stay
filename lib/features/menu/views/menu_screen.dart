@@ -12,6 +12,7 @@ import 'package:caffeine_stay/features/menu/repositories/menu_repository.dart';
 import 'package:caffeine_stay/features/menu/view_models/menu_view_model.dart';
 import 'package:caffeine_stay/features/menu/view_models/text_provider.dart';
 import 'package:caffeine_stay/features/menu/views/pages/search/menu_search_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';

@@ -11,14 +11,14 @@ class _List extends StatelessWidget with ApiMixin {
           title: '계정 관리',
           list: [
             SettingsItem(
-              icon: Icons.boy_rounded,
+              icon: CupertinoIcons.person_fill,
               label: '개인 정보',
               onTap: () {
                 context.pushNamed(SettingsInfoScreen.routeName);
               },
             ),
             SettingsItem(
-              icon: Icons.notifications_rounded,
+              icon: CupertinoIcons.bell_fill,
               label: '알림 설정',
               onTap: () {
                 context.pushNamed(SettingsNotifyScreen.routeName);
@@ -31,7 +31,7 @@ class _List extends StatelessWidget with ApiMixin {
           title: '데이터 및 서비스',
           list: [
             SettingsItem(
-              icon: Icons.share_rounded,
+              icon: CupertinoIcons.share,
               label: '데이터 내보내기',
               onTap: () {
                 //
@@ -39,7 +39,7 @@ class _List extends StatelessWidget with ApiMixin {
             ),
             SettingsItem(
               isWarn: true,
-              icon: Icons.refresh_rounded,
+              icon: CupertinoIcons.refresh,
               label: '데이터 초기화',
               onTap: () async {
                 final notify = globalContainer.read(
@@ -58,12 +58,12 @@ class _List extends StatelessWidget with ApiMixin {
           title: '기타',
           list: [
             SettingsItem(
-              icon: Icons.info_outlined,
+              icon: CupertinoIcons.info_circle_fill,
               label: '이용 약관',
               onTap: () {},
             ),
             SettingsItem(
-              icon: Icons.people_alt_rounded,
+              icon: CupertinoIcons.person_2_fill,
               label: '개인정보 처리방침',
               onTap: () {},
             ),

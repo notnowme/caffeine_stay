@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:caffeine_stay/common/constants/styles/colors.dart';
 import 'package:caffeine_stay/common/constants/styles/text_style.dart';
 import 'package:caffeine_stay/common/widgets/default_scaffold.dart';
@@ -8,7 +6,9 @@ import 'package:caffeine_stay/common/widgets/list_item_card.dart';
 import 'package:caffeine_stay/features/home/mixins/home_mixin.dart';
 import 'package:caffeine_stay/features/home/providers/caffeine_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_glass_morphism/flutter_glass_morphism.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';

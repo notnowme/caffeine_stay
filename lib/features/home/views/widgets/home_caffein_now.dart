@@ -128,11 +128,16 @@ class _SleepPeriodic extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sleeptime = ref.watch(sleepTimeProvider);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColor.backgroundColor.withValues(alpha: .2),
-        borderRadius: BorderRadius.all(
-          Radius.circular(context.r(24)),
+    return GlassMorphismContainer(
+      blurIntensity: 35.0,
+      opacity: 0.15,
+      glassThickness: 1.0,
+      tintColor: AppColor.primaryColor,
+      enableBackgroundDistortion: false,
+      enableGlassBorder: true,
+      borderRadius: BorderRadius.all(
+        Radius.circular(
+          context.r(8),
         ),
       ),
       child: Padding(
@@ -142,13 +147,10 @@ class _SleepPeriodic extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Transform.rotate(
-              angle: -math.pi / 6,
-              child: Icon(
-                size: context.r(24),
-                Icons.nightlight_outlined,
-                color: AppColor.backgroundColor.withValues(alpha: 0.8),
-              ),
+            Icon(
+              size: context.r(24),
+              CupertinoIcons.moon_fill,
+              color: AppColor.backgroundColor.withValues(alpha: 0.8),
             ),
             context.horizontalSpace(8),
             Text(

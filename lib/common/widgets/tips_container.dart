@@ -1,5 +1,6 @@
 import 'package:caffeine_stay/common/constants/styles/colors.dart';
 import 'package:caffeine_stay/common/constants/styles/text_style.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
@@ -37,7 +38,7 @@ class TipsContainer extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            Icons.info_outline_rounded,
+            CupertinoIcons.exclamationmark_triangle,
             size: context.h(24),
             color: AppColor.primaryColor,
           ),

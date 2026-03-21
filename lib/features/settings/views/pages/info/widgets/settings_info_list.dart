@@ -34,7 +34,7 @@ class _ListState extends ConsumerState<_List> with MyInfoState, MyInfoEvent {
                     builder: (consumerContext, ref, child) {
                       final weight = watchWeight(ref);
                       return _SectionItem(
-                        icon: Icons.boy_rounded,
+                        icon: CupertinoIcons.person_fill,
                         label: '체중',
                         onTap: () async {
                           final value = await showModalBottomSheet(
@@ -65,7 +65,7 @@ class _ListState extends ConsumerState<_List> with MyInfoState, MyInfoEvent {
                     builder: (context, ref, child) {
                       final age = watchAge(ref);
                       return _SectionItem(
-                        icon: Icons.calendar_today_rounded,
+                        icon: CupertinoIcons.calendar,
                         label: '나이',
                         onTap: () async {
                           final value = await showModalBottomSheet(
@@ -95,7 +95,7 @@ class _ListState extends ConsumerState<_List> with MyInfoState, MyInfoEvent {
                     builder: (context, ref, child) {
                       final gender = watchGender(ref);
                       return _SectionToggleItem(
-                        icon: Icons.people_alt_rounded,
+                        icon: CupertinoIcons.person_2_fill,
                         label: '성별',
                         option1: '남성',
                         option2: '여성',

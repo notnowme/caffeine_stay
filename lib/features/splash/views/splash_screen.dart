@@ -36,30 +36,30 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with ApiMixin {
     final splashProvider = ref.watch(splashRedirectProvider);
     ref.listen(splashRedirectProvider, (prev, next) {
       next.whenData((status) {
-        if (status == 'onboard') {
+        if (status['message'] == 'onboard') {
           context.goNamed(OnboardScreen.routeName);
-        } else if (status == 'home') {
+        } else if (status['message'] == 'home') {
           context.goNamed(HomeScreen.routeName);
         }
       });
     });
-    return splashProvider.when(
-      skipLoadingOnRefresh: true,
-      skipLoadingOnReload: true,
-      data: (data) {
-        return _Scaffold(
-          text: const _Text(),
-          loading: _Loading(
-            state: data,
-          ),
-        );
-      },
-      loading: () {
-        return Container();
-      },
-      error: (error, stackTrace) {
-        return Container();
-      },
+    return _Scaffold(
+      text: const _Text(),
+      loading: splashProvider.when(
+        skipLoadingOnRefresh: true,
+        skipLoadingOnReload: true,
+        data: (data) {
+          return _Loading(
+            state: data['status'] == 'move' ? '확인 완료!' : data['message']!,
+          );
+        },
+        loading: () {
+          return Container();
+        },
+        error: (error, stackTrace) {
+          return Container();
+        },
+      ),
     );
   }
 }

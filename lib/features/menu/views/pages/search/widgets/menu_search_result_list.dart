@@ -44,6 +44,45 @@ class _ResultListState extends ConsumerState<_ResultList> {
           .watch(menuAsyncProvider)
           .when(
             data: (data) {
+              if (data.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: context.edgeInsets(
+                      top: context.h(16),
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            CupertinoIcons.doc_text_search,
+                            color: AppColor.primaryColor,
+                            size: context.h(36),
+                          ),
+                          context.verticalSpace(12),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                // TextSpan(
+                                //   text: name,
+                                //   style: PretendardText.body1.copyWith(
+                                //     color: AppColor.primaryColor,
+                                //   ),
+                                // ),
+                                TextSpan(
+                                  text: '메뉴를 찾지 못했어요...',
+                                  style: PretendardText.body2.copyWith(
+                                    color: AppColor.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
               return SliverList.separated(
                 itemCount: data.length,
                 separatorBuilder: (context, index) {

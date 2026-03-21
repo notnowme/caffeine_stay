@@ -18,7 +18,7 @@ class _List extends StatelessWidget {
                   }),
                 );
                 return SettingsItem(
-                  icon: Icons.abc,
+                  icon: CupertinoIcons.zzz,
                   label: '카페인 리바운드 경고',
                   desc: '카페인 수치가 급격히 낮아질 때 알림을 받습니다.',
                   onTap: () {},
@@ -41,7 +41,7 @@ class _List extends StatelessWidget {
                   }),
                 );
                 return SettingsItem(
-                  icon: Icons.abc,
+                  icon: CupertinoIcons.drop,
                   label: '수분 섭취 리마인드',
                   desc: '규칙적인 수분 섭취를 위한 알림을 보냅니다.',
                   onTap: () {},
