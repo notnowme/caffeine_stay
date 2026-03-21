@@ -33,14 +33,22 @@ class _List extends StatelessWidget with ApiMixin {
             SettingsItem(
               icon: Icons.share_rounded,
               label: '데이터 내보내기',
-              onTap: () {},
+              onTap: () {
+                //
+              },
             ),
             SettingsItem(
               isWarn: true,
               icon: Icons.refresh_rounded,
               label: '데이터 초기화',
               onTap: () async {
-                //
+                final notify = globalContainer.read(
+                  localNotifyProvider.notifier,
+                );
+                final notfies = await notify.checkMyNotify();
+                if (notfies.isNotEmpty) {
+                  print(notfies.length);
+                }
               },
             ),
           ],

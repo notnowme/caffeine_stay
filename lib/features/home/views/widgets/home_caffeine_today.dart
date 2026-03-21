@@ -5,6 +5,7 @@ class _TodayDrink extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('today page');
     return SliverPadding(
       padding: context.edgeInsets(
         horizontal: context.w(16),

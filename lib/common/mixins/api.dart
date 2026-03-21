@@ -65,7 +65,7 @@ mixin class ApiMixin {
     return [];
   }
 
-  Future<void> dataCheck(WidgetRef ref) async {
+  Future<void> dataCheck(Ref ref) async {
     final db = ref.read(databaseProvider);
     final check = await (db.caffeineItems.select()..limit(1)).getSingleOrNull();
     if (check == null) {

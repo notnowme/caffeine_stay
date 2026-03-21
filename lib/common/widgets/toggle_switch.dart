@@ -16,9 +16,10 @@ class ToggleSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: !isOn ? AppColor.primaryColor : AppColor.secondaryColor,
+          color: isOn ? AppColor.primaryColor : AppColor.secondaryColor,
           borderRadius: BorderRadius.all(
             Radius.circular(
               context.r(24),
@@ -27,11 +28,12 @@ class ToggleSwitch extends StatelessWidget {
         ),
         child: AnimatedPadding(
           padding: context.edgeInsets(
-            left: isOn ? context.w(3) : context.w(23),
-            right: !isOn ? context.w(3) : context.w(23),
+            left: !isOn ? context.w(3) : context.w(23),
+            right: isOn ? context.w(3) : context.w(23),
             vertical: context.h(3),
           ),
-          duration: const Duration(milliseconds: 200),
+          curve: const Cubic(0.64, 0.34, 0.46, 0.82),
+          duration: const Duration(milliseconds: 300),
           child: DecoratedBox(
             decoration: const BoxDecoration(
               color: Colors.white,

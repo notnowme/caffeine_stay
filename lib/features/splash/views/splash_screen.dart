@@ -1,10 +1,10 @@
 import 'package:caffeine_stay/common/constants/styles/colors.dart';
 import 'package:caffeine_stay/common/constants/styles/text_style.dart';
 import 'package:caffeine_stay/common/mixins/api.dart';
-import 'package:caffeine_stay/common/providers/secure_storage_provider.dart';
 import 'package:caffeine_stay/common/widgets/default_scaffold.dart';
 import 'package:caffeine_stay/features/home/views/home_screen.dart';
 import 'package:caffeine_stay/features/onboard/views/onboard_screen.dart';
+import 'package:caffeine_stay/features/splash/providers/splash_redirect_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,52 +29,37 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with ApiMixin {
   @override
   void initState() {
     super.initState();
-    _redirect();
-  }
-
-  String currentState = '데이터를 확인 중...';
-
-  void _redirect() async {
-    final storage = ref.read(secureStorageProvider);
-    final currentVersion = await storage.read(key: 'version');
-    if (currentVersion == null) {
-      final sheetVersion = await getVersion();
-      if (sheetVersion != null) {
-        await storage.write(key: 'version', value: sheetVersion);
-      }
-    } else {
-      setState(() {
-        currentState = '데이터를 읽어 오는 중...';
-      });
-      await dataCheck(ref);
-      if (mounted) {
-        setState(() {
-          currentState = '데이터 저장 완료!';
-        });
-        await Future.delayed(const Duration(milliseconds: 200));
-        setState(() {
-          currentState = '개인 정보를 불러오는 중...';
-        });
-        await Future.delayed(const Duration(milliseconds: 200));
-        final isFirstTime = await storage.read(key: 'isFirstTime');
-        if (mounted) {
-          if (isFirstTime == null || isFirstTime == 'true') {
-            context.goNamed(OnboardScreen.routeName);
-          } else {
-            context.goNamed(HomeScreen.routeName);
-          }
-        }
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _Scaffold(
-      text: const _Text(),
-      loading: _Loading(
-        state: currentState,
-      ),
+    final splashProvider = ref.watch(splashRedirectProvider);
+    ref.listen(splashRedirectProvider, (prev, next) {
+      next.whenData((status) {
+        if (status == 'onboard') {
+          context.goNamed(OnboardScreen.routeName);
+        } else if (status == 'home') {
+          context.goNamed(HomeScreen.routeName);
+        }
+      });
+    });
+    return splashProvider.when(
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: true,
+      data: (data) {
+        return _Scaffold(
+          text: const _Text(),
+          loading: _Loading(
+            state: data,
+          ),
+        );
+      },
+      loading: () {
+        return Container();
+      },
+      error: (error, stackTrace) {
+        return Container();
+      },
     );
   }
 }

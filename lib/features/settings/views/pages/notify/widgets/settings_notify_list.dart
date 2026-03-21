@@ -10,25 +10,51 @@ class _List extends StatelessWidget {
         Section(
           title: '일반 알림',
           list: [
-            SettingsItem(
-              icon: Icons.abc,
-              label: '카페인 리바운드 경고',
-              desc: '카페인 수치가 급격히 낮아질 때 알림을 받습니다.',
-              onTap: () {},
-              button: ToggleSwitch(
-                isOn: true,
-                onTap: () {},
-              ),
+            Consumer(
+              builder: (consumerContext, ref, child) {
+                final rebound = ref.watch(
+                  notifySettingProvider.select((model) {
+                    return model.value?.rebound ?? false;
+                  }),
+                );
+                return SettingsItem(
+                  icon: Icons.abc,
+                  label: '카페인 리바운드 경고',
+                  desc: '카페인 수치가 급격히 낮아질 때 알림을 받습니다.',
+                  onTap: () {},
+                  button: ToggleSwitch(
+                    isOn: rebound,
+                    onTap: () async {
+                      ref
+                          .read(notifySettingProvider.notifier)
+                          .toggleRebound(!rebound);
+                    },
+                  ),
+                );
+              },
             ),
-            SettingsItem(
-              icon: Icons.abc,
-              label: '수분 섭취 리마인드',
-              desc: '규칙적인 수분 섭취를 위한 알림을 보냅니다.',
-              onTap: () {},
-              button: ToggleSwitch(
-                isOn: false,
-                onTap: () {},
-              ),
+            Consumer(
+              builder: (consumerContext, ref, child) {
+                final hydrate = ref.watch(
+                  notifySettingProvider.select((model) {
+                    return model.value?.hydrate ?? false;
+                  }),
+                );
+                return SettingsItem(
+                  icon: Icons.abc,
+                  label: '수분 섭취 리마인드',
+                  desc: '규칙적인 수분 섭취를 위한 알림을 보냅니다.',
+                  onTap: () {},
+                  button: ToggleSwitch(
+                    isOn: hydrate,
+                    onTap: () {
+                      ref
+                          .read(notifySettingProvider.notifier)
+                          .toggleHydrate(!hydrate);
+                    },
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -74,13 +74,27 @@ class _CaffineNow extends StatelessWidget {
   }
 }
 
-class _CaffeineRealTimeText extends ConsumerWidget {
+class _CaffeineRealTimeText extends ConsumerWidget with HomeEvent {
   const _CaffeineRealTimeText();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentCaffeine =
         ref.watch(currentCaffeineStreamProvider).value ?? 0.0;
+    ref.listen(reboundTimeProvider, (prev, next) async {
+      if (next != null && next.isAfter(DateTime.now())) {
+        rewriteNotify(ref);
+      }
+    });
+    // final test = ref.watch(reboundTimeProvider);
+    // print(test);
+    // ref.listen(todayCaffeineProvider, (prev, next) async {
+    //   if (next.hasValue && next.value!.isNotEmpty) {
+    //     if (prev?.value?.length != next.value!.length) {
+    //       await rewriteNotify(ref);
+    //     }
+    //   }
+    // });
     return TweenAnimationBuilder(
       tween: Tween(begin: 0, end: currentCaffeine),
       duration: const Duration(milliseconds: 500),
@@ -144,7 +158,7 @@ class _SleepPeriodic extends ConsumerWidget {
               ),
             ),
             Text(
-              DateFormat('a hh:mm', 'ko').format(sleeptime),
+              DateFormat('a hh:mm', 'ko').format(sleeptime ?? DateTime.now()),
               style: PretendardText.body1.copyWith(
                 color: AppColor.backgroundColor,
               ),

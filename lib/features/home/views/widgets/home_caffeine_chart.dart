@@ -78,7 +78,7 @@ class _CaffeineChart extends ConsumerWidget {
           gridData: const FlGridData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: spots.value ?? [],
+              spots: spots.value ?? emptySpots(),
               isCurved: true,
               // 급격한 데이터 변화 시 선이 아래로 튀는 것 방지?
               preventCurveOverShooting: true,

@@ -21,6 +21,13 @@ abstract class MyInfoModel with _$MyInfoModel {
     required bool smoking,
   }) = _MyInfoModel;
 
+  factory MyInfoModel.empty() => const MyInfoModel(
+    gender: Gender.female,
+    weight: 45,
+    age: 17,
+    smoking: false,
+  );
+
   factory MyInfoModel.fromJson(Map<String, dynamic> json) =>
       _$MyInfoModelFromJson(json);
 }

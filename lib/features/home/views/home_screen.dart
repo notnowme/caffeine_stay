@@ -5,6 +5,7 @@ import 'package:caffeine_stay/common/constants/styles/text_style.dart';
 import 'package:caffeine_stay/common/widgets/default_scaffold.dart';
 import 'package:caffeine_stay/common/widgets/default_sliver_appbar.dart';
 import 'package:caffeine_stay/common/widgets/list_item_card.dart';
+import 'package:caffeine_stay/features/home/mixins/home_mixin.dart';
 import 'package:caffeine_stay/features/home/providers/caffeine_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

@@ -1,3 +1,4 @@
+import 'package:caffeine_stay/common/hooks/hooks.dart';
 import 'package:caffeine_stay/common/widgets/error_wrapper.dart';
 import 'package:caffeine_stay/router.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 // riverpod을 글로벌로 접근하기 위해
 final globalContainer = ProviderContainer();
@@ -12,9 +15,16 @@ final globalContainer = ProviderContainer();
 void main() async {
   // 플러터 엔진이 준비됐는지
   WidgetsFlutterBinding.ensureInitialized();
+  await initNotify();
 
   // env 로드
   await dotenv.load(fileName: ".env");
+
+  // 알림 스케줄 사용하기 위한 초기화
+  tz.initializeTimeZones();
+
+  // 시간대 설정
+  tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
   initializeDateFormatting().then(
     (_) => runApp(

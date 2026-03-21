@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:caffeine_stay/common/models/error_model.dart';
 import 'package:caffeine_stay/common/providers/error_provider.dart';
@@ -65,32 +64,33 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
 
   // Stream이 종료될 때까지 실행한다.
   yield* Stream.periodic(homeGraphDuration, (count) {
-    final halflife = CaffeineCalc.getMyHalfLife(
+    final halfLife = CaffeineCalculator.getMyHalfLife(
       isSmoking: my.smoking,
       age: my.age,
     );
 
-    double total = 0;
-    for (final report in reports) {
-      total += CaffeineCalc.calcRemainig(
-        reports: report,
-        halfLife: halflife,
-      );
-    }
-    return total;
+    return CaffeineCalculator.totalReaming(
+      reports: reports,
+      halfLife: halfLife,
+    );
   });
 });
 
 /// Stream에 초기값을 넣기 위한 계산
 double _calculateTotal(List<ReportWithMenuModel> reports, MyInfoModel my) {
-  final halflife = CaffeineCalc.getMyHalfLife(
+  final halflife = CaffeineCalculator.getMyHalfLife(
     isSmoking: my.smoking,
     age: my.age,
   );
   return reports.fold(
     0,
     (prev, r) =>
-        prev + CaffeineCalc.calcRemainig(reports: r, halfLife: halflife),
+        prev +
+        CaffeineCalculator.singleRemaing(
+          initAmount: r.menu.caffeineAmount,
+          halfLife: halflife,
+          drinkTime: r.report.drinkDateAt,
+        ),
   );
 }
 
@@ -105,23 +105,27 @@ final hoursChartStreamProvider = StreamProvider.autoDispose<List<FlSpot>>((
   });
 });
 
+List<FlSpot> emptySpots() {
+  List<FlSpot> list = [];
+  for (int i = 0; i <= 12; i++) {
+    list.add(FlSpot(i.toDouble(), 0.0));
+  }
+  return list;
+}
+
 /// 특정 시간의 농도를 계산하기
 List<FlSpot> getHoursCaffeine(Ref ref) {
-  final my = ref.read(myInfoProvider).value!;
-  final halflife = CaffeineCalc.getMyHalfLife(
-    isSmoking: my.smoking,
-    age: my.age,
-  );
+  final halflife = ref.watch(userHalfLieftProvider)!;
   final now = DateTime.now();
-  final allReport = ref.read(reportsAsyncProvider).value ?? [];
+  final allReport = ref.watch(reportsAsyncProvider).value ?? [];
 
   List<FlSpot> list = [];
   for (int i = 0; i <= 12; i++) {
     final target = now.subtract(Duration(hours: 12 - i));
-    final amount = CaffeineCalc.calcRemainigAt(
+    final amount = CaffeineCalculator.totalReaming(
       reports: allReport,
       halfLife: halflife,
-      date: target,
+      targetTime: target,
     );
 
     list.add(FlSpot(i.toDouble(), amount));
@@ -153,6 +157,9 @@ class TodayCaffineAsyncNotifier
   late final MenuRepository _repo;
   @override
   FutureOr<List<ReportWithMenuModel>> build() async {
+    ref.onDispose(() {
+      print('disposed???');
+    });
     _repo = ref.read(menuRepositoryProvider);
     return await _fetchTodayReports();
   }
@@ -200,22 +207,38 @@ final todayCaffeineAmountProvider = FutureProvider.autoDispose((ref) {
   }
 });
 
-DateTime calcSleepTime({
-  required double currentCaffeine,
-  double threshold = 50.0,
-  double halflife = 5.0,
-}) {
-  if (currentCaffeine <= threshold) return DateTime.now();
+/// 공통적으로 사용하는 반감기 프로바이더
+final userHalfLieftProvider = Provider.autoDispose((ref) {
+  final myInfo = ref.watch(myInfoProvider).value;
+  if (myInfo == null) return null;
 
-  double result =
-      halflife * (math.log(threshold / currentCaffeine) / math.log(0.5));
-  return DateTime.now().add(Duration(minutes: (result * 60).toInt()));
-}
+  return CaffeineCalculator.getMyHalfLife(
+    age: myInfo.age,
+    isSmoking: myInfo.smoking,
+  );
+});
 
-// 카페인 변화를 바라보고 있으므로
-// 이 프로바이더는 굳이 Stream일 필요가 없다
+/// 예상 수면 가능 시간 프로바이더
 final sleepTimeProvider = Provider.autoDispose((ref) {
-  final currentCaffeine = ref.watch(currentCaffeineStreamProvider).value ?? 0.0;
-  // final my = ref.watch(myInfoProvider);
-  return calcSleepTime(currentCaffeine: currentCaffeine);
+  final reports = ref.watch(reportsAsyncProvider).value ?? [];
+  final halfLife = ref.watch(userHalfLieftProvider);
+  if (halfLife == null) return null;
+
+  return CaffeineCalculator.predictTime(
+    reports: reports,
+    halfLife: halfLife,
+    threshold: 50.0,
+  );
+});
+
+/// 예상 리바운드 시간 프로바이더
+final reboundTimeProvider = Provider.autoDispose((ref) {
+  final reports = ref.watch(reportsAsyncProvider).value ?? [];
+  final halfLife = ref.watch(userHalfLieftProvider);
+  if (halfLife == null) return null;
+
+  return CaffeineCalculator.predictTime(
+    reports: reports,
+    halfLife: halfLife,
+  );
 });

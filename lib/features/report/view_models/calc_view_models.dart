@@ -1,8 +1,8 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:caffeine_stay/features/menu/models/report_with_menu_model.dart';
 
-class CaffeineCalc {
+class CaffeineCalculator {
   static double getMyHalfLife({
     required bool isSmoking,
     required int age,
@@ -20,42 +20,85 @@ class CaffeineCalc {
     return 5.0;
   }
 
-  static double calcRemainig({
-    required ReportWithMenuModel reports,
+  static double singleRemaing({
+    required double initAmount,
+    required DateTime drinkTime,
     required double halfLife,
-    DateTime? date,
+    DateTime? targetTime,
   }) {
-    final targetTime = date ?? DateTime.now();
-    final hours =
-        targetTime.difference(reports.report.drinkDateAt).inMinutes / 60.0;
+    final now = targetTime ?? DateTime.now();
+    final hours = now.difference(drinkTime).inMinutes / 60.0;
 
-    double result;
+    // 마시기 전이라면 0.0
+    if (hours < 0) return 0.0;
 
-    // 섭취 후 30분은 선형적 증가한다고 함.
     if (hours < 0.5) {
-      result = reports.menu.caffeineAmount * (hours / 0.5);
+      // 30분 동안은 선형적으로 증가한다.
+      return initAmount * (hours / 0.5);
     } else {
-      // 30분 후 반감기가 적용한다는 듯.
-      final decayHours = hours - 0.5;
-      result = reports.menu.caffeineAmount * pow(0.5, decayHours / halfLife);
+      // 30분 후 지수적으로 감소
+      return initAmount * math.pow(0.5, (hours - 0.5) / halfLife);
     }
-    return result < 1.0 ? 0.0 : result;
   }
 
-  static double calcRemainigAt({
+  static double totalReaming({
     required List<ReportWithMenuModel> reports,
     required double halfLife,
-    DateTime? date,
+    DateTime? targetTime,
   }) {
-    final targetTime = date ?? DateTime.now();
-    return reports.fold(0.0, (sum, r) {
-      if (r.report.drinkDateAt.isAfter(targetTime)) return sum;
+    final now = targetTime ?? DateTime.now();
+
+    return reports.fold(0.0, (sum, report) {
       return sum +
-          CaffeineCalc.calcRemainig(
-            reports: r,
+          singleRemaing(
+            initAmount: report.menu.caffeineAmount,
+            drinkTime: report.report.drinkDateAt,
             halfLife: halfLife,
-            date: targetTime,
+            targetTime: now,
           );
     });
+  }
+
+  static DateTime? predictTime({
+    required List<ReportWithMenuModel> reports,
+    required double halfLife,
+    double threshold = 10.0,
+  }) {
+    if (reports.isEmpty) return null;
+
+    // 마지막으로 마신 카페인 흡수 완료 시간
+    DateTime checkTime = reports.last.report.drinkDateAt.add(
+      const Duration(minutes: 30),
+    );
+
+    // 기준치보다 낮으면 끝내기
+    double initAmount = CaffeineCalculator.totalReaming(
+      reports: reports,
+      halfLife: halfLife,
+      targetTime: checkTime,
+    );
+
+    if (initAmount <= threshold) return null;
+
+    // 10분씩 추가하면서 예상하기
+    // 24시간 * 6번(10분 단위)
+    for (int i = 0; i < 24 * 6; i++) {
+      checkTime = checkTime.add(
+        const Duration(minutes: 10),
+      );
+
+      double currentToal = CaffeineCalculator.totalReaming(
+        reports: reports,
+        halfLife: halfLife,
+        targetTime: checkTime,
+      );
+
+      // 기준치 이하가 되는 첫 번째 시간
+      if (currentToal <= threshold) {
+        return checkTime;
+      }
+    }
+    // 24시간 내에 떨어지지 않는다면
+    return null;
   }
 }

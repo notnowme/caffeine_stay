@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:caffeine_stay/common/models/error_model.dart';
 import 'package:caffeine_stay/common/providers/error_provider.dart';
+import 'package:caffeine_stay/common/providers/secure_storage_provider.dart';
 import 'package:caffeine_stay/common/repositories/info_repository.dart';
 import 'package:caffeine_stay/features/onboard/models/myinfo_model.dart';
 import 'package:caffeine_stay/features/settings/views/pages/info/settings_info_screen.dart';
@@ -12,17 +13,16 @@ class MyInfoViewModel extends AsyncNotifier<MyInfoModel> {
   @override
   build() async {
     _repo = ref.read(infoRepositoryProvider);
-    return await _getMyInfo() ??
-        const MyInfoModel(
-          gender: Gender.male,
-          weight: 70,
-          age: 25,
-          smoking: false,
-        );
+    return await _getMyInfo() ?? MyInfoModel.empty();
   }
 
   FutureOr<MyInfoModel?> _getMyInfo() async {
     try {
+      final storage = ref.read(secureStorageProvider);
+      final isFirstTime = await storage.read(key: 'isFirstTime');
+      if (isFirstTime == null || isFirstTime == 'true') {
+        return null;
+      }
       final my = await _repo.getMyInfo();
       if (my != null) {
         return my;
@@ -65,14 +65,7 @@ class MyInfoViewModel extends AsyncNotifier<MyInfoModel> {
   }
 
   void clear() {
-    state = const AsyncValue.data(
-      MyInfoModel(
-        gender: Gender.male,
-        weight: 70,
-        age: 25,
-        smoking: false,
-      ),
-    );
+    state = AsyncValue.data(MyInfoModel.empty());
   }
 }
 
