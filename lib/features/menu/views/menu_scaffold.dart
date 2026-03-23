@@ -46,9 +46,10 @@ class _Scaffold extends StatelessWidget {
             ],
           ),
           favoriteList,
-          addButton,
+          // TODO 추가 예정
+          // addButton,
           SliverToBoxAdapter(
-            child: context.verticalSpace(40),
+            child: context.verticalSpace(120),
           ),
         ],
       ),

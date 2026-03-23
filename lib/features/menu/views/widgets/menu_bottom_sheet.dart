@@ -128,9 +128,10 @@ class MenuBottomSheet extends ConsumerWidget {
                           );
                           ref.read(errorProvider.notifier).updateError(error);
                         }
-                        if (bottomSheetContext.mounted) {
+                        if (context.mounted) {
                           context.pop();
                         }
+                        if (bottomSheetContext.mounted) {}
                       },
                     ),
                     context.verticalSpace(30),

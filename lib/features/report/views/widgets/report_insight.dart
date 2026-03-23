@@ -1,48 +1,46 @@
 part of '../report_screen.dart';
 
-class _ReportInsight extends StatelessWidget {
+class _ReportInsight extends ConsumerWidget {
   const _ReportInsight();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: context.edgeInsets(
-          top: context.h(16),
+          top: context.h(8),
+          horizontal: context.w(16),
         ),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                CupertinoIcons.quote_bubble,
-                color: AppColor.primaryColor,
-                size: context.h(36),
-              ),
-              context.verticalSpace(4),
-              Text(
-                '카페인 인사이트를 찾게 되면 알려드릴게요.',
-                style: PretendardText.body1.copyWith(
-                  color: AppColor.primaryColor,
-                ),
-              ),
-            ],
-          ),
+        child: const Stack(
+          children: [
+            _HeatmapChart(),
+            // Positioned.fill(
+            //   child: GlassMorphismContainer(
+            //     blurIntensity: 1.0,
+            //     opacity: 0.15,
+            //     glassThickness: 3.5,
+            //     tintColor: Colors.blue,
+            //     enableBackgroundDistortion: true,
+            //     enableGlassBorder: true,
+            //     borderRadius: const BorderRadius.all(
+            //       Radius.zero,
+            //     ),
+            //     child: Container(),
+            //   ),
+            // ),
+            // Positioned.fill(
+            //   child: Center(
+            //     child: Text(
+            //       '광고 시청 후 확인해 보세요',
+            //       style: PretendardText.body4.copyWith(
+            //         color: AppColor.primaryColor,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
-    // return SliverPadding(
-    //   padding: context.edgeInsets(
-    //     horizontal: context.w(16),
-    //   ),
-    //   sliver: SliverList.separated(
-    //     itemCount: 10,
-    //     separatorBuilder: (context, index) {
-    //       return context.verticalSpace(20);
-    //     },
-    //     itemBuilder: (context, index) {
-    //       return const Text('afdsasfdad');
-    //     },
-    //   ),
-    // );
   }
 }

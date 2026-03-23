@@ -22,7 +22,7 @@ class ReportFamilyAsyncNotifier
 
     final result = await AsyncValue.guard(() => _fetchReports());
 
-    if (state.hasError) {
+    if (result.hasError) {
       _updateGlobalError();
     }
 

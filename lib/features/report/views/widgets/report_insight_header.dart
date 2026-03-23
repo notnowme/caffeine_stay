@@ -1,7 +1,11 @@
 part of '../report_screen.dart';
 
 class _InsightHeader extends StatelessWidget {
-  const _InsightHeader();
+  const _InsightHeader({
+    required this.title,
+  });
+
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +19,11 @@ class _InsightHeader extends StatelessWidget {
           children: [
             context.verticalSpace(24),
             Text(
-              '카페인 인사이트',
+              title,
               style: PretendardText.title1.copyWith(
                 color: AppColor.primaryColor,
               ),
             ),
-            context.verticalSpace(12),
           ],
         ),
       ),

@@ -61,8 +61,9 @@ class MenuRepository {
   }
 
   Future<List<ReportWithMenuModel>?> fetchReportByDateTime(
-    DateTime date,
-  ) async {
+    DateTime date, {
+    bool isOrderAsc = true,
+  }) async {
     final query =
         _db.select(_db.reports).join([
             innerJoin(
@@ -76,7 +77,11 @@ class MenuRepository {
             _db.reports.drinkDateAt.isBiggerOrEqualValue(date),
           )
           ..orderBy(
-            [OrderingTerm.desc(_db.reports.drinkDateAt)],
+            [
+              isOrderAsc
+                  ? OrderingTerm.asc(_db.reports.drinkDateAt)
+                  : OrderingTerm.desc(_db.reports.drinkDateAt),
+            ],
           );
     final results = await query.get();
     return results.map((row) {

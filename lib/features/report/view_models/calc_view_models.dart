@@ -1,12 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:caffeine_stay/features/menu/models/report_with_menu_model.dart';
+import 'package:caffeine_stay/features/onboard/models/myinfo_model.dart';
 
 class CaffeineCalculator {
   static double getMyHalfLife({
     required bool isSmoking,
     required int age,
     bool isPregnant = false,
+    required Gender gender,
   }) {
     // 임신 여부
     if (isPregnant) return 12.0;
@@ -17,7 +19,7 @@ class CaffeineCalculator {
     // 나이
     if (age >= 65) return 7.5;
 
-    return 5.0;
+    return gender == Gender.female ? 5.5 : 5.0;
   }
 
   static double singleRemaing({
@@ -67,9 +69,10 @@ class CaffeineCalculator {
     if (reports.isEmpty) return null;
 
     // 마지막으로 마신 카페인 흡수 완료 시간
-    DateTime checkTime = reports.last.report.drinkDateAt.add(
-      const Duration(minutes: 30),
-    );
+    DateTime checkTime = reports
+        .map((r) => r.report.drinkDateAt)
+        .reduce((a, b) => a.isAfter(b) ? a : b)
+        .add(const Duration(minutes: 30));
 
     // 기준치보다 낮으면 끝내기
     double initAmount = CaffeineCalculator.totalReaming(

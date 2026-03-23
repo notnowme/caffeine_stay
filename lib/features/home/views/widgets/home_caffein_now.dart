@@ -127,7 +127,7 @@ class _SleepPeriodic extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sleeptime = ref.watch(sleepTimeProvider);
+    final sleeptime = ref.watch(sleepTimeProvider).value ?? DateTime.now();
     return GlassMorphismContainer(
       blurIntensity: 35.0,
       opacity: 0.15,
@@ -160,7 +160,7 @@ class _SleepPeriodic extends ConsumerWidget {
               ),
             ),
             Text(
-              DateFormat('a hh:mm', 'ko').format(sleeptime ?? DateTime.now()),
+              DateFormat('a hh:mm', 'ko').format(sleeptime),
               style: PretendardText.body1.copyWith(
                 color: AppColor.backgroundColor,
               ),

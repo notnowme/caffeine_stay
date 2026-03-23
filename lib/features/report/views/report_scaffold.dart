@@ -5,15 +5,19 @@ class _Scaffold extends StatelessWidget {
     required this.appBar,
     required this.tabHeader,
     required this.tabList,
+    required this.heatmapHeader,
+    required this.heatmap,
     required this.insightHeader,
-    required this.insight,
+    required this.insightList,
   });
 
   final Widget appBar;
   final Widget tabHeader;
   final Widget tabList;
+  final Widget heatmapHeader;
+  final Widget heatmap;
   final Widget insightHeader;
-  final Widget insight;
+  final Widget insightList;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +26,7 @@ class _Scaffold extends StatelessWidget {
       child: DefaultTabController(
         length: 2,
         child: CustomScrollView(
+          physics: const ClampingScrollPhysics(),
           clipBehavior: Clip.none,
           slivers: [
             SliverMainAxisGroup(
@@ -29,10 +34,12 @@ class _Scaffold extends StatelessWidget {
                 appBar,
                 tabHeader,
                 tabList,
+                heatmapHeader,
+                heatmap,
                 insightHeader,
               ],
             ),
-            insight,
+            insightList,
             SliverToBoxAdapter(
               child: context.verticalSpace(120),
             ),

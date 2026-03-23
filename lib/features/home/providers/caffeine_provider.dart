@@ -4,7 +4,6 @@ import 'package:caffeine_stay/common/models/error_model.dart';
 import 'package:caffeine_stay/common/providers/error_provider.dart';
 import 'package:caffeine_stay/features/menu/models/report_with_menu_model.dart';
 import 'package:caffeine_stay/features/menu/repositories/menu_repository.dart';
-import 'package:caffeine_stay/features/onboard/models/myinfo_model.dart';
 import 'package:caffeine_stay/features/onboard/view_models/myinfo_vm.dart';
 import 'package:caffeine_stay/features/report/view_models/calc_view_models.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -54,9 +53,9 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
   ref,
 ) async* {
   final reports = ref.watch(reportsAsyncProvider).value ?? [];
-  final my = ref.watch(myInfoProvider).value!;
+  final halfLife = ref.watch(userHalfLieftProvider) ?? 5.0;
 
-  double initCalc() => _calculateTotal(reports, my);
+  double initCalc() => _calculateTotal(reports, halfLife);
 
   // 초기값
   // 실행이 끝난 후 다음 yield를 실행한다.
@@ -64,10 +63,7 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
 
   // Stream이 종료될 때까지 실행한다.
   yield* Stream.periodic(homeGraphDuration, (count) {
-    final halfLife = CaffeineCalculator.getMyHalfLife(
-      isSmoking: my.smoking,
-      age: my.age,
-    );
+    final halfLife = ref.watch(userHalfLieftProvider) ?? 5.0;
 
     return CaffeineCalculator.totalReaming(
       reports: reports,
@@ -77,18 +73,17 @@ final currentCaffeineStreamProvider = StreamProvider.autoDispose<double>((
 });
 
 /// Stream에 초기값을 넣기 위한 계산
-double _calculateTotal(List<ReportWithMenuModel> reports, MyInfoModel my) {
-  final halflife = CaffeineCalculator.getMyHalfLife(
-    isSmoking: my.smoking,
-    age: my.age,
-  );
+double _calculateTotal(
+  List<ReportWithMenuModel> reports,
+  double halfLife,
+) {
   return reports.fold(
     0,
     (prev, r) =>
         prev +
         CaffeineCalculator.singleRemaing(
           initAmount: r.menu.caffeineAmount,
-          halfLife: halflife,
+          halfLife: halfLife,
           drinkTime: r.report.drinkDateAt,
         ),
   );
@@ -157,9 +152,6 @@ class TodayCaffineAsyncNotifier
   late final MenuRepository _repo;
   @override
   FutureOr<List<ReportWithMenuModel>> build() async {
-    ref.onDispose(() {
-      print('disposed???');
-    });
     _repo = ref.read(menuRepositoryProvider);
     return await _fetchTodayReports();
   }
@@ -215,20 +207,32 @@ final userHalfLieftProvider = Provider.autoDispose((ref) {
   return CaffeineCalculator.getMyHalfLife(
     age: myInfo.age,
     isSmoking: myInfo.smoking,
+    gender: myInfo.gender,
   );
 });
 
 /// 예상 수면 가능 시간 프로바이더
-final sleepTimeProvider = Provider.autoDispose((ref) {
-  final reports = ref.watch(reportsAsyncProvider).value ?? [];
+final sleepTimeProvider = StreamProvider.autoDispose<DateTime?>((ref) async* {
+  final reports = ref.watch(todayCaffeineProvider).value ?? [];
   final halfLife = ref.watch(userHalfLieftProvider);
-  if (halfLife == null) return null;
-
-  return CaffeineCalculator.predictTime(
-    reports: reports,
-    halfLife: halfLife,
-    threshold: 50.0,
-  );
+  if (halfLife == null) yield null;
+  yield CaffeineCalculator.predictTime(
+        reports: reports,
+        halfLife: halfLife ?? 5.0,
+        threshold: 50.0,
+      ) ??
+      DateTime.now();
+  yield* Stream.periodic(homeGraphDuration, (_) {
+    final reports = ref.watch(todayCaffeineProvider).value ?? [];
+    final halfLife = ref.watch(userHalfLieftProvider);
+    if (halfLife == null) return null;
+    return CaffeineCalculator.predictTime(
+          reports: reports,
+          halfLife: halfLife,
+          threshold: 50.0,
+        ) ??
+        DateTime.now();
+  });
 });
 
 /// 예상 리바운드 시간 프로바이더
@@ -242,3 +246,43 @@ final reboundTimeProvider = Provider.autoDispose((ref) {
     halfLife: halfLife,
   );
 });
+
+/// 히트맵 데이터
+Map<int, List<ReportWithMenuModel>> getHeatMapDatas(
+  List<ReportWithMenuModel> reports,
+) {
+  final Map<int, List<ReportWithMenuModel>> datas = {};
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day);
+  for (final report in reports) {
+    final drinkDate = report.report.drinkDateAt;
+
+    final dayDiff = todayStart
+        .difference(
+          DateTime(drinkDate.year, drinkDate.month, drinkDate.day),
+        )
+        .inDays;
+
+    if (dayDiff >= 0 && dayDiff < 7) {
+      final dayIndex = 6 - dayDiff;
+      final key = (dayIndex * 24) + drinkDate.hour;
+      datas.putIfAbsent(key, () => []).add(report);
+    }
+  }
+  return datas;
+}
+
+/// 히트맵 데이터 프로바이더
+final heatMapDataProvider =
+    FutureProvider.autoDispose<Map<int, List<ReportWithMenuModel>>?>((
+      ref,
+    ) async {
+      final now = DateTime.now();
+      final startDay = DateTime(now.year, now.month, now.day);
+      final targetDay = startDay.subtract(const Duration(days: 6));
+
+      final repo = ref.read(menuRepositoryProvider);
+      final datas = await repo.fetchReportByDateTime(targetDay);
+      if (datas == null) return null;
+      return getHeatMapDatas(datas);
+    });
